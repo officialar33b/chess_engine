@@ -1,3 +1,5 @@
+use crate::pieces::{Piece, Roles, Side};
+
 //define each tile. create a tile struct, and then use it to make the board somehow.
 pub enum Occ {
     EMPTY,
@@ -37,13 +39,19 @@ impl Tile {
 
 pub struct Board {
     // tiles: [[Tile; 8]; 8], // a 2-dimensional array 8 by 8, which is the size of the chess board.
-    tiles: Vec<Tile>, // According to ChatGPT, much better actually!
+    tiles: Vec<Tile>,
+    pieces: Vec<Piece>, // According to ChatGPT, much better actually!
 }
 
 impl Board {
     pub fn new() -> Self {
         let mut tiles = Vec::with_capacity(64); // 8x8
+        // create the pieces as well.
+        let mut white_pieces = Vec::with_capacity(16);
+        let mut black_pieces = Vec::with_capacity(16);
 
+        // maybe combine the pieces into one <Vec> type.
+        let mut combine_pieces = Vec::with_capacity(32);
         // adding the tiles and then finally returning a Board Struct.
         for y in 0..8 {
             for x in 0..8 {
@@ -51,7 +59,87 @@ impl Board {
                 tiles.push(Tile::new(num_index, x, y));
             }
         }
-        return Self { tiles };
+
+        // for y in 0..2 {//two rows
+        //     for x in 0..8{
+        //         let num_index = y * 8 +x;
+        //         black_pieces.push(Piece::new(num_index, x, y, role, side));
+        //     }
+
+        // I'll have to add the types of pieces seperately.
+        // I'll create a trait function for adding the piece.
+
+        // KING
+        black_pieces.push(Piece::new(4, 4, 4, 0, Roles::KING, Side::BLACK));
+        white_pieces.push(Piece::new(60, 60, 4, 7, Roles::KING, Side::WHITE));
+
+        // QUEEN
+        black_pieces.push(Piece::new(3, 3, 3, 0, Roles::QUEEN, Side::BLACK));
+        white_pieces.push(Piece::new(59, 59, 3, 7, Roles::QUEEN, Side::WHITE));
+
+        // ROOK
+        black_pieces.push(Piece::new(0, 0, 0, 0, Roles::ROOK, Side::BLACK));
+        black_pieces.push(Piece::new(7, 7, 7, 0, Roles::ROOK, Side::BLACK));
+
+        white_pieces.push(Piece::new(56, 56, 0, 7, Roles::ROOK, Side::WHITE));
+        white_pieces.push(Piece::new(63, 63, 7, 7, Roles::ROOK, Side::WHITE));
+
+        // BISHOP
+        black_pieces.push(Piece::new(2, 2, 2, 0, Roles::BISHOP, Side::BLACK));
+        black_pieces.push(Piece::new(5, 5, 5, 0, Roles::BISHOP, Side::BLACK));
+
+        white_pieces.push(Piece::new(58, 58, 2, 7, Roles::BISHOP, Side::WHITE));
+        white_pieces.push(Piece::new(61, 61, 5, 7, Roles::BISHOP, Side::WHITE));
+
+        // KNIGHT
+        black_pieces.push(Piece::new(1, 1, 1, 0, Roles::KNIGHT, Side::BLACK));
+        black_pieces.push(Piece::new(6, 6, 6, 0, Roles::KNIGHT, Side::BLACK));
+
+        white_pieces.push(Piece::new(57, 57, 1, 7, Roles::KNIGHT, Side::WHITE));
+        white_pieces.push(Piece::new(62, 62, 6, 7, Roles::KNIGHT, Side::WHITE));
+
+        // PAWN
+        // black PAWNS.
+        for j in 0..=7 {
+            // j is x, don't be confused.
+            let y: u8 = 1;
+            black_pieces.push(Piece::new(
+                8 * y + j,
+                8 * y + j,
+                j,
+                y,
+                Roles::PAWN,
+                Side::BLACK,
+            ));
+        }
+
+        // white PAWNS
+        for j in 0..=7 {
+            let y: u8 = 6;
+            white_pieces.push(Piece::new(
+                8 * y + j,
+                8 * y + j,
+                j,
+                y,
+                Roles::PAWN,
+                Side::WHITE,
+            ));
+        }
+
+        // for pieces in white_pieces.iter(){
+        //     combine_pieces.push(pieces);
+        // }
+
+        // for pieces in black_pieces.iter(){
+        //     combine_pieces.push(pieces);
+        // } incorrect
+
+        combine_pieces.extend(white_pieces);
+        combine_pieces.extend(black_pieces);
+        Self {
+            tiles,
+            pieces: combine_pieces,
+        }
         // Board { tiles }; this syntax also works.
     }
 
@@ -81,8 +169,8 @@ impl Board {
             Err("Invalid board postion")
         }
     }
-    // Draw the chessboard.
-    pub fn draw_board(&self) {
+    // Draw the chessboard showing which tiles are occupied and which aren't.
+    pub fn draw_occupancy_board(&self) {
         println!("  0 1 2 3 4 5 6 7");
 
         for y in 0..8 {
@@ -100,6 +188,54 @@ impl Board {
             }
 
             println!();
+        }
+    }
+
+    pub fn draw_game_board(&self) {
+        println!("  0 1 2 3 4 5 6 7");
+
+        for y in 0..8 {
+            print!("{}", y);
+
+            for x in 0..8 {
+                let mut symbol = ".";
+
+                for piece in &self.pieces {
+                    if piece.x() == x && piece.y() == y {
+                        symbol = match piece.role() {
+                            Roles::KING => "♔",
+                            Roles::QUEEN => "♕",
+                            Roles::BISHOP => "♗",
+                            Roles::KNIGHT => "♘",
+                            Roles::ROOK => "♖",
+                            Roles::PAWN => "♙",
+                        };
+                        // black looks white and white looks black for some reason.
+                        if let Side::BLACK = piece.side() {
+                            symbol = match piece.role() {
+                                Roles::KING => "♚",
+                                Roles::QUEEN => "♛",
+                                Roles::BISHOP => "♝",
+                                Roles::KNIGHT => "♞",
+                                Roles::ROOK => "♜",
+                                Roles::PAWN => "♟️",
+                            };
+                        }
+                        break;
+                    }
+                }
+                print!("{} ", symbol);
+            }
+            println!()
+        }
+    }
+    // add an piece_id, which will be a unique identifier for each individual piece.
+    pub fn move_piece(&mut self, piece_index: u8, new_x: u8, new_y: u8) {
+        // for loop to find the right index
+        for piece in self.pieces.iter_mut() {
+            if piece_index == piece.piece_id() {
+                piece.change_position(new_x, new_y);
+            }
         }
     }
 }
