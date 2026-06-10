@@ -60,6 +60,10 @@ impl Board {
         return self.tiles.get(index);
     }
 
+    pub fn get_tile_mut(&mut self, index: usize) -> Option<&mut Tile> {
+        return self.tiles.get_mut(index);
+    }
+
     // by x and y index.
     // Option type deals with result and none, Result type deals with result and error.
     pub fn get_tile_xy(&self, x: usize, y: usize) -> Option<&Tile> {
@@ -67,6 +71,15 @@ impl Board {
             return self.tiles.get(y * 8 + x);
         }
         None
+    }
+
+    pub fn change_tile_occupancy(&mut self, index: usize) -> Result<(), &'static str> {
+        if let Some(tile) = self.get_tile_mut(index) {
+            tile.set_occupied(true);
+            Ok(())
+        } else {
+            Err("Invalid board postion")
+        }
     }
     // Draw the chessboard.
     pub fn draw_board(&self) {
