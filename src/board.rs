@@ -1,4 +1,4 @@
-use crate::pieces::{Piece, Roles, Side};
+use crate::pieces::{self, Piece, Roles, Side};
 
 //define each tile. create a tile struct, and then use it to make the board somehow.
 pub enum Occ {
@@ -33,6 +33,8 @@ impl Tile {
     pub fn set_occupied(&mut self, occupy: bool) {
         if occupy == true {
             self.occupied = Occ::OCCUPIED;
+        } else {
+            self.occupied = Occ::EMPTY;
         }
     }
 }
@@ -161,9 +163,13 @@ impl Board {
         None
     }
 
-    pub fn change_tile_occupancy(&mut self, index: usize) -> Result<(), &'static str> {
+    pub fn change_tile_occupancy(
+        &mut self,
+        index: usize,
+        is_occupied: bool,
+    ) -> Result<(), &'static str> {
         if let Some(tile) = self.get_tile_mut(index) {
-            tile.set_occupied(true);
+            tile.set_occupied(is_occupied);
             Ok(())
         } else {
             Err("Invalid board postion")
@@ -191,7 +197,7 @@ impl Board {
         }
     }
 
-    pub fn draw_game_board(&self) {
+    pub fn draw_game_board(&mut self) {
         println!("  0 1 2 3 4 5 6 7");
 
         for y in 0..8 {
@@ -199,10 +205,12 @@ impl Board {
 
             for x in 0..8 {
                 let mut symbol = ".";
+                for i in 0..self.pieces.len() {
+                    if self.pieces[i].x() == x && self.pieces[i].y() == y {
+                        self.change_tile_occupancy(usize::from(8 * y + x), true)
+                            .unwrap();
 
-                for piece in &self.pieces {
-                    if piece.x() == x && piece.y() == y {
-                        symbol = match piece.role() {
+                        symbol = match self.pieces[i].role() {
                             Roles::KING => "♔",
                             Roles::QUEEN => "♕",
                             Roles::BISHOP => "♗",
@@ -211,8 +219,8 @@ impl Board {
                             Roles::PAWN => "♙",
                         };
                         // black looks white and white looks black for some reason.
-                        if let Side::BLACK = piece.side() {
-                            symbol = match piece.role() {
+                        if let Side::BLACK = self.pieces[i].side() {
+                            symbol = match self.pieces[i].role() {
                                 Roles::KING => "♚",
                                 Roles::QUEEN => "♛",
                                 Roles::BISHOP => "♝",
@@ -224,6 +232,33 @@ impl Board {
                         break;
                     }
                 }
+
+                // for piece in self.pieces {
+                //     if piece.x() == x && piece.y() == y {
+                //         // self.change_tile_occupancy(usize::from(8 * y + x), true);
+                //         // it only draws when the x and y match.
+                //         symbol = match piece.role() {
+                //             Roles::KING => "♔",
+                //             Roles::QUEEN => "♕",
+                //             Roles::BISHOP => "♗",
+                //             Roles::KNIGHT => "♘",
+                //             Roles::ROOK => "♖",
+                //             Roles::PAWN => "♙",
+                //         };
+                //         // black looks white and white looks black for some reason.
+                //         if let Side::BLACK = piece.side() {
+                //             symbol = match piece.role() {
+                //                 Roles::KING => "♚",
+                //                 Roles::QUEEN => "♛",
+                //                 Roles::BISHOP => "♝",
+                //                 Roles::KNIGHT => "♞",
+                //                 Roles::ROOK => "♜",
+                //                 Roles::PAWN => "♟️",
+                //             };
+                //         }
+                //         break;
+                //     }
+                // }
                 print!("{} ", symbol);
             }
             println!()
@@ -237,5 +272,9 @@ impl Board {
                 piece.change_position(new_x, new_y);
             }
         }
+        // i also want to two things
+        // 1. Check if another piece is already there.
+        // 2. Update the tile.set_occupied somehow.
+        self.change_tile_occupancy(usize::from(piece_index), false); // handle the error thing later.
     }
 }
