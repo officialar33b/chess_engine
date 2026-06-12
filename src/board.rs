@@ -1,4 +1,4 @@
-use crate::pieces::{self, Piece, Roles, Side};
+use crate::pieces::{Piece, Roles, Side};
 
 //define each tile. create a tile struct, and then use it to make the board somehow.
 pub enum Occ {
@@ -162,7 +162,9 @@ impl Board {
         }
         None
     }
-
+    // pub fn check_side(&self) -> Option<&Side> {
+    //     self
+    // }
     pub fn change_tile_occupancy(
         &mut self,
         index: usize,
@@ -174,6 +176,150 @@ impl Board {
         } else {
             Err("Invalid board postion")
         }
+    }
+    // Create functions for checking the tile in front, back, right, left, and diagonal, which should also include which <SIDE> piece is there as well.
+    // Front.
+    pub fn check_white_front(&self, cur_x: u8, cur_y: u8) -> bool {
+        for tile in self.tiles.iter() {
+            if cur_y == 0 {
+                return false;
+            } else if tile.x_index == cur_x && tile.y_index == cur_y - 1 {
+                return tile.is_occupied();
+            }
+        }
+        false
+    }
+    pub fn check_black_front(&self, cur_x: u8, cur_y: u8) -> bool {
+        for tile in self.tiles.iter() {
+            if tile.x_index == cur_x && tile.y_index == cur_y + 1 {
+                return tile.is_occupied();
+            }
+        }
+        false
+    }
+
+    // Back.
+    pub fn check_white_back(&self, cur_x: u8, cur_y: u8) -> bool {
+        for tile in self.tiles.iter() {
+            if tile.x_index == cur_x && tile.y_index == cur_y + 1 {
+                // opposite logic of the above, check_black_front() and check_white_front() are same.
+                return tile.is_occupied();
+            }
+        }
+        false
+    }
+    pub fn check_black_back(&self, cur_x: u8, cur_y: u8) -> bool {
+        for tile in self.tiles.iter() {
+            if cur_y == 0 {
+                return false;
+            } else if tile.x_index == cur_x && tile.y_index == cur_y - 1 {
+                return tile.is_occupied();
+            }
+        }
+        false
+    }
+
+    // Right.
+    pub fn check_white_right(&self, cur_x: u8, cur_y: u8) -> bool {
+        for tile in self.tiles.iter() {
+            if tile.x_index == cur_x + 1 && tile.y_index == cur_y {
+                // opposite logic of the above, check_black_front() and check_white_front() are same.
+                return tile.is_occupied();
+            }
+        }
+        false
+    }
+    pub fn check_black_right(&self, cur_x: u8, cur_y: u8) -> bool {
+        for tile in self.tiles.iter() {
+            if tile.x_index == cur_x - 1 && tile.y_index == cur_y {
+                return tile.is_occupied();
+            }
+        }
+        false
+    }
+
+    // Left.
+    pub fn check_white_left(&self, cur_x: u8, cur_y: u8) -> bool {
+        for tile in self.tiles.iter() {
+            if cur_x == 0 {
+                return false;
+            } else if tile.x_index == cur_x - 1 && tile.y_index == cur_y {
+                // opposite logic of the above, check_black_front() and check_white_front() are same.
+                return tile.is_occupied();
+            }
+        }
+        false
+    }
+    pub fn check_black_left(&self, cur_x: u8, cur_y: u8) -> bool {
+        for tile in self.tiles.iter() {
+            if tile.x_index == cur_x + 1 && tile.y_index == cur_y {
+                return tile.is_occupied();
+            }
+        }
+        false
+    }
+
+    // Diagonal.
+    // Diagonal Front.
+    pub fn check_white_front_diagonal(&self, cur_x: u8, cur_y: u8) -> (bool, bool) {
+        let mut right_diag = false;
+        let mut left_diag = false;
+        for tile in self.tiles.iter() {
+            if cur_y == 0 || cur_x == 0 {
+                right_diag = false;
+            } else if tile.x_index == cur_x + 1 && tile.y_index == cur_y - 1 {
+                // opposite logic of the above, check_black_front() and check_white_front() are same.
+                right_diag = tile.is_occupied();
+            } else if tile.x_index == cur_x - 1 && tile.y_index == cur_y - 1 {
+                left_diag = tile.is_occupied();
+            }
+        }
+        return (right_diag, left_diag); //right left
+    }
+    pub fn check_black_front_diagonal(&self, cur_x: u8, cur_y: u8) -> (bool, bool) {
+        let mut right_diag = false;
+        let mut left_diag = false;
+        for tile in self.tiles.iter() {
+            if cur_y == 0 || cur_x == 0 {
+                right_diag = false;
+            } else if tile.x_index == cur_x + 1 && tile.y_index == cur_y + 1 {
+                // opposite logic of the above, check_black_front() and check_white_front() are same.
+                right_diag = tile.is_occupied();
+            } else if tile.x_index == cur_x - 1 && tile.y_index == cur_y + 1 {
+                left_diag = tile.is_occupied();
+            }
+        }
+        return (right_diag, left_diag); //right left
+    }
+    pub fn check_black_back_diagonal(&self, cur_x: u8, cur_y: u8) -> (bool, bool) {
+        let mut right_diag = false;
+        let mut left_diag = false;
+        for tile in self.tiles.iter() {
+            if cur_y == 0 || cur_x == 0 {
+                right_diag = false;
+            } else if tile.x_index == cur_x + 1 && tile.y_index == cur_y - 1 {
+                // opposite logic of the above, check_black_front() and check_white_front() are same.
+                right_diag = tile.is_occupied();
+            } else if tile.x_index == cur_x - 1 && tile.y_index == cur_y - 1 {
+                left_diag = tile.is_occupied();
+            }
+        }
+        return (right_diag, left_diag); //right left
+    }
+    pub fn check_white_back_diagonal(&self, cur_x: u8, cur_y: u8) -> (bool, bool) {
+        let mut right_diag = false;
+        let mut left_diag = false;
+        for tile in self.tiles.iter() {
+            if cur_y == 0 || cur_x == 0 {
+                right_diag = false;
+            } else if tile.x_index == cur_x + 1 && tile.y_index == cur_y + 1 {
+                // opposite logic of the above, check_black_front() and check_white_front() are same.
+                right_diag = tile.is_occupied();
+            } else if tile.x_index == cur_x - 1 && tile.y_index == cur_y + 1 {
+                left_diag = tile.is_occupied();
+            }
+        }
+        return (right_diag, left_diag); //right left
     }
     // Draw the chessboard showing which tiles are occupied and which aren't.
     pub fn draw_occupancy_board(&self) {
@@ -265,16 +411,39 @@ impl Board {
         }
     }
     // add an piece_id, which will be a unique identifier for each individual piece.
+    pub fn move_white_pawn(&mut self, piece_index: u8, new_x:u8, new_y:u8, first_move:bool){
+        for piece in self.pieces.iter_mut(){
+            if piece_index == piece.piece_id(){
+                if first_move == true{
+                    if self.check_front == false && piece.legal_pawn_move(
+                    self.check_white_front(cur_x, cur_y)check_front,
+                    self.check_white_front_diagonal(piece.x(), piece.y()),
+                    self.check_white_front_diagonal(piece.x(), piece.y()),
+                    first_move){
+
+                    }
+                }
+            }
+        }
+
+    }
     pub fn move_piece(&mut self, piece_index: u8, new_x: u8, new_y: u8) {
         // for loop to find the right index
         for piece in self.pieces.iter_mut() {
             if piece_index == piece.piece_id() {
+                // Two checks: First, if the next tile is occupied,
+                // Second, if the move is legal.
+                // Its better to wrap the thing based on match statements.
+                match piece.role(){
+                    Roles::PAWN =>
+                }
                 piece.change_position(new_x, new_y);
             }
         }
         // i also want to two things
         // 1. Check if another piece is already there.
         // 2. Update the tile.set_occupied somehow.
-        self.change_tile_occupancy(usize::from(piece_index), false); // handle the error thing later.
+        self.change_tile_occupancy(usize::from(piece_index), false)
+            .unwrap(); // handle the error thing later.
     }
 }
