@@ -2,12 +2,19 @@
 // I can do that though
 
 mod board;
+mod movement;
 
 use board::Board;
+use movement::PawnMoves;
 
 fn main() {
-    let mut board = Board::empty();
-    let board = Board::new(&mut board);
+    let mut blank_board = Board::empty();
+    let mut game_board = Board::new(&mut blank_board);
 
-    board.draw_game_board();
+    game_board.draw_game_board();
+
+    //moving pawn and redrawing.
+    game_board.move_pawn(50, PawnMoves::FORWARD);
+    game_board.move_pawn(50, PawnMoves::RIGHTFORWARD);
+    game_board.draw_game_board();
 }

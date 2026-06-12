@@ -5,6 +5,8 @@
  *
  */
 
+use crate::movement::{self, PawnMoves};
+
 #[derive(PartialEq)]
 pub enum Color {
     BLACK,
@@ -228,6 +230,14 @@ impl Board {
             }
         }
     }
+
+    fn de_occupy(&mut self, tile_id: u8) {
+        for tile in self.tiles.iter_mut() {
+            if tile.tile_id == tile_id {
+                tile.is_occupied = false;
+            }
+        }
+    }
     //draw_board_function.
     pub fn draw_game_board(&self) {
         for y in 0..8 {
@@ -260,6 +270,51 @@ impl Board {
                 print!("{} ", symbol);
             }
             println!();
+        }
+    }
+
+    // movement itself.
+    // Let's start with Pawns.
+    pub fn move_pawn(&mut self, piece_id: u8, movement: PawnMoves) {
+        // Find the pawn first.
+        let piece_index = self
+            .pieces
+            .iter()
+            .position(|p| p.piece_id == piece_id)
+            .expect("Piece not found");
+
+        let piece = &self.pieces[piece_index];
+
+        // Calculate destination.
+        let target_tile = match piece.color {
+            Color::BLACK => match movement {
+                PawnMoves::FORWARD => piece.tile_id + 8,
+                PawnMoves::RIGHTFORWARD => piece.tile_id + 9,
+                PawnMoves::LEFTFORWARD => piece.tile_id + 7,
+            },
+            Color::WHITE => match movement {
+                PawnMoves::FORWARD => piece.tile_id - 8,
+                PawnMoves::RIGHTFORWARD => piece.tile_id - 7,
+                PawnMoves::LEFTFORWARD => piece.tile_id - 9,
+            },
+        };
+
+        let occupied = self.pieces.iter().any(|p| p.tile_id == target_tile);
+
+        match movement {
+            // Forward move requires an empty square.
+            PawnMoves::FORWARD => {
+                if !occupied {
+                    self.pieces[piece_index].tile_id = target_tile;
+                }
+            }
+
+            // Diagonal moves require a piece on the target square.
+            PawnMoves::RIGHTFORWARD | PawnMoves::LEFTFORWARD => {
+                if occupied {
+                    self.pieces[piece_index].tile_id = target_tile;
+                }
+            }
         }
     }
 }
