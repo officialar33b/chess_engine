@@ -5,7 +5,7 @@
  *
  */
 
-use crate::movement::{self, PawnMoves};
+use crate::game::PawnMoves;
 
 #[derive(PartialEq)]
 pub enum Color {
@@ -306,6 +306,8 @@ impl Board {
             PawnMoves::FORWARD => {
                 if !occupied {
                     self.pieces[piece_index].tile_id = target_tile;
+                } else {
+                    println!("Occupied");
                 }
             }
 
@@ -313,6 +315,8 @@ impl Board {
             PawnMoves::RIGHTFORWARD | PawnMoves::LEFTFORWARD => {
                 if occupied {
                     self.pieces[piece_index].tile_id = target_tile;
+                } else {
+                    println!("Illegal Move.");
                 }
             }
         }

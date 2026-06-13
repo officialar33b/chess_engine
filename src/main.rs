@@ -2,10 +2,10 @@
 // I can do that though
 
 mod board;
-mod movement;
+mod game;
 
 use board::Board;
-use movement::PawnMoves;
+use game::PawnMoves;
 
 fn main() {
     let mut blank_board = Board::empty();
